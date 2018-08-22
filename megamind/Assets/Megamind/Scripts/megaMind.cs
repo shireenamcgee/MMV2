@@ -472,7 +472,7 @@ public class megaMind : MonoBehaviour
             gameOver = true;
 
             GameProgress.Write(new EventRecord() { EventName = "CheckMove:WIN", GameNumber = GameOfMatch, Row = currentMove, Col = CurrentCol   });
-
+            return;
         }
 
         // ok. no win, so increment the current move

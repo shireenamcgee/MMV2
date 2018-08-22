@@ -40,13 +40,20 @@ public class menu : MonoBehaviour {
     // The megaMind level will be loaded
     //
 
-    public void playClicked() {
+    public void playClicked()
+    {
+
+       // if(GetPreviousParticipantId())
+
         megaMind.GameProgress.Write(new megaMind.EventRecord() { EventName = "PLAY", });
         
 		Application.LoadLevel ("megaMind");
 	}
 
+    public void TextChanged(string Text)
+    {
 
+    }
 
 	//
 	// public void exitClicked()
@@ -91,5 +98,10 @@ public class menu : MonoBehaviour {
         Application.LoadLevel ("settings");
 	}
 
-	#endregion UI Eventhandling
+    #endregion UI Eventhandling
+
+
+
+
+
 }
