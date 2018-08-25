@@ -41,7 +41,7 @@ public class megaMind : MonoBehaviour
     public static class GameProgress 
     {
         
-        static string baseDirectory = @"c:\temp\Mastermind";
+        public static string baseDirectory = @"c:\temp\Mastermind";
         public static string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}", System.DateTime.Today.ToString("yyyyMMdd")));
         public static void Write(string eventName)
         {
