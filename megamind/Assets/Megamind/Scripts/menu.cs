@@ -71,7 +71,7 @@ public class menu : MonoBehaviour
     private int SetNewParticipantId()
     {
         string ParticipantIdFileName="";
-        int PID = -1;
+        megaMind.GameProgress.ParticipantId = -1;
         try
         {
             
@@ -89,7 +89,7 @@ public class menu : MonoBehaviour
 
                 if (sLine == null || sLine.Trim() == string.Empty)
                 {
-                    PID = 1;
+                    megaMind.GameProgress.ParticipantId = 1;
                 }
                 else
                 {
@@ -102,31 +102,31 @@ public class menu : MonoBehaviour
                         {
                             int i;
                             if (int.TryParse(asParameter[1], out i))
-                                PID = i;
+                                megaMind.GameProgress.ParticipantId = i;
                         }
                     }
                 }
             }
             else
             {
-                 PID = 1;
+                megaMind.GameProgress.ParticipantId = 1;
             }
 
-            if(PID<1)
+            if(megaMind.GameProgress.ParticipantId < 1)
             {
                 //error?
                 //dont want to start from 0 and risk overwrites
                 throw (new ArgumentException("Invalid Calculation of Participant Id.  Value should be at least 1."));
             }
 
-            return PID;
+            return megaMind.GameProgress.ParticipantId;
         }
         catch (Exception ex)
         {
             // if we get an exception, set the participant id to something based on the hour of day so that we do  get overlap
             // assuming max play rate is no greater than 5 games in 2 minutes;
             //create a unique daily id of that grain
-            PID = DateTime.Now.Hour * 30 + DateTime.Now.Minute / 2;
+            megaMind.GameProgress.ParticipantId  = DateTime.Now.Hour * 30 + DateTime.Now.Minute / 2;
             megaMind.GameProgress.Write(new megaMind.EventRecord(){ EventName="WARNING:ParticipantId Not sequential", DataKey="DETAIL" , DataValue ="There is a file tha tracks participant Id and gets incremented for each player.  something whent wrong so the Participant Id was set to (Minute Of Day /2) to ensure uniqueness" });
             //something is brokej but we dont want to crash the game just because we cannot get the id
             //so create one based on the time of day and and offset that will ensure no overlap occurs.  
@@ -135,7 +135,7 @@ public class menu : MonoBehaviour
         }
         finally
         {
-            participantId.text = (++PID).ToString().PadLeft(3, '0');
+            participantId.text = (++megaMind.GameProgress.ParticipantId).ToString().PadLeft(3, '0');
             //write out the new Participant Id to file
             using (var fi = System.IO.File.CreateText(ParticipantIdFileName))
             {
@@ -144,7 +144,7 @@ public class menu : MonoBehaviour
                 fi.Close();
             }
         }
-        return PID;
+        return megaMind.GameProgress.ParticipantId;
 
     }
 

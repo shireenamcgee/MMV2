@@ -40,7 +40,9 @@ public class megaMind : MonoBehaviour
 
     public static class GameProgress 
     {
-        
+        public static int CurrentRow;
+        public static int CurrentCol;
+        public static int ParticipantId;
         public static string baseDirectory = @"c:\temp\Mastermind";
         public static string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}", System.DateTime.Today.ToString("yyyyMMdd")));
         public static void Write(string eventName)
@@ -48,11 +50,17 @@ public class megaMind : MonoBehaviour
 
             Write(new EventRecord() { EventName = eventName });
         }
+
+
+
         public static void Write(EventRecord Record)
         {
             if (!System.IO.Directory.Exists(baseDirectory))
                 System.IO.Directory.CreateDirectory(baseDirectory);
 
+            Record.ParticipantId = ParticipantId.ToString();
+            Record.Col = CurrentCol;
+            Record.Row = CurrentRow;
             string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}", System.DateTime.Today.ToString("yyyyMMdd")));
             System.IO.FileInfo fi = new System.IO.FileInfo(OutputFilename);
             bool AddHeader = !fi.Exists;
@@ -97,9 +105,9 @@ public class megaMind : MonoBehaviour
     public Text gameTime;
 
     // which move are we making
-    private int currentMove;
+    public  int currentMove;
     int remainder;
-    private int CurrentCol { get; set; }
+
 
     // is the game over
     bool gameOver;
@@ -167,7 +175,7 @@ public class megaMind : MonoBehaviour
         // the escape key is equivalent to android's back button
         if (Input.GetKey(KeyCode.Escape))
         {
-            GameProgress.Write(new EventRecord() { EventName = "Escape pressed" , GameNumber=GameOfMatch , Row = currentMove, Col =CurrentCol  });
+            GameProgress.Write(new EventRecord() { EventName = "Escape pressed" , GameNumber=GameOfMatch });
             showMenu();
         }
 
@@ -366,7 +374,7 @@ public class megaMind : MonoBehaviour
         // (four pins set)
         if (!isMoveValid(currentMove))
         {
-            GameProgress.Write(new EventRecord() { EventName = "CheckMove", GameNumber = GameOfMatch, DataKey = "Result", DataValue = "Invalid",Row = currentMove, Col = CurrentCol });
+            GameProgress.Write(new EventRecord() { EventName = "CheckMove", GameNumber = GameOfMatch, DataKey = "Result", DataValue = "Invalid" });
 
             panelConfirm.gameObject.SetActive(true);
             return;
@@ -471,7 +479,7 @@ public class megaMind : MonoBehaviour
             panelGameWon.gameObject.SetActive(true);
             gameOver = true;
 
-            GameProgress.Write(new EventRecord() { EventName = "CheckMove:WIN", GameNumber = GameOfMatch, Row = currentMove, Col = CurrentCol   });
+            GameProgress.Write(new EventRecord() { EventName = "CheckMove:WIN", GameNumber = GameOfMatch  });
             return;
         }
 
@@ -485,15 +493,15 @@ public class megaMind : MonoBehaviour
             panelGameOver.gameObject.SetActive(true);
             secret.gameObject.SetActive(false);
             gameOver = true;
-            GameProgress.Write(new EventRecord() { EventName = "CheckMove:LOSEGAME", GameNumber = GameOfMatch, Row = currentMove, Col = CurrentCol });
+            GameProgress.Write(new EventRecord() { EventName = "CheckMove:LOSEGAME", GameNumber = GameOfMatch });
 
         }
         // player may do another move
         else
         {
-            GameProgress.Write(new EventRecord() { EventName = "CheckMove:NOWIN", GameNumber = GameOfMatch, Row = currentMove , Col = CurrentCol, DataKey = "UserSelection" ,DataValue = string.Join(",",PlayerPicks.Select(p=>p.ToString()).ToArray<string>()) });
-            GameProgress.Write(new EventRecord() { EventName = "CheckMove:NOWIN", GameNumber = GameOfMatch, Row = currentMove, Col = CurrentCol, DataKey = "BlackPins", DataValue = blackPins.ToString()  });
-            GameProgress.Write(new EventRecord() { EventName = "CheckMove:NOWIN", GameNumber = GameOfMatch, Row = currentMove, Col = CurrentCol, DataKey = "WhitePins", DataValue = whitePins.ToString() });
+            GameProgress.Write(new EventRecord() { EventName = "CheckMove:NOWIN", GameNumber = GameOfMatch, DataKey = "UserSelection" ,DataValue = string.Join(",",PlayerPicks.Select(p=>p.ToString()).ToArray<string>()) });
+            GameProgress.Write(new EventRecord() { EventName = "CheckMove:NOWIN", GameNumber = GameOfMatch, DataKey = "BlackPins", DataValue = blackPins.ToString()  });
+            GameProgress.Write(new EventRecord() { EventName = "CheckMove:NOWIN", GameNumber = GameOfMatch, DataKey = "WhitePins", DataValue = whitePins.ToString() });
 
             Vector2 position = moveMarker.GetComponent<RectTransform>().anchoredPosition;
             position.y += 130;
@@ -575,6 +583,8 @@ public class megaMind : MonoBehaviour
     {
         // find the actual row
         GameObject row = GameObject.Find("row-" + currentMove);
+        megaMind.GameProgress.CurrentRow = currentMove;
+
         // find the first empty pin
         int col = 0;
         foreach (Transform child in row.transform)
@@ -582,7 +592,8 @@ public class megaMind : MonoBehaviour
             Image picture = child.GetComponent<Image>();
             if (picture.sprite == pinImages[0])
             {
-                CurrentCol = col;
+                megaMind.GameProgress.CurrentCol = col;
+                GameProgress.CurrentCol = col;
                 GameProgress.Write(new EventRecord() { EventName = "PickColor", GameNumber = GameOfMatch, Color = pinColor.ToString()  });
 
                 picture.sprite = pinImages[pinColor];
