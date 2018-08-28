@@ -1,0 +1,6 @@
+EventTime,ParticipantId,EventName,DataKey,DataValue,Row,Col,Color,GameNumber
+2018082812485421,4,PLAY,,,0,0,,0
+2018082812485443,4,SetSecretColors,SecretColors,"1,2,3,4,5,6",0,0,,1
+2018082812485444,4,SetSecretColors,SecretColors,"1,2,3,4,5,6",0,0,,1
+2018082812485444,4,SetSecretColors,SecretColors,"1,2,3,4,5,6",0,0,,1
+2018082812485445,4,SetSecretColors,SecretColors,"1,2,3,4,5,6",0,0,,1
