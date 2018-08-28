@@ -43,7 +43,10 @@ public class megaMind : MonoBehaviour
         public static int CurrentRow;
         public static int CurrentCol;
         public static int ParticipantId;
-        public static string baseDirectory = @".\";
+        public static string baseDirectory
+        {
+            get { return System.Environment.GetFolderPath( System.Environment.SpecialFolder.Personal);}
+        }
         public static string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}", System.DateTime.Today.ToString("yyyyMMdd")));
         public static void Write(string eventName)
         {
