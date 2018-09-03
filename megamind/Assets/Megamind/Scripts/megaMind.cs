@@ -258,9 +258,11 @@ public class megaMind : MonoBehaviour
                 col = colors[Random.Range(0, colors.Count)];
             }
             else
-            {  
-                //get the value from the preset color               
-                col = colors[ColorsForMatches[GameOfMatch-1][i]];
+            {
+                //get the value from the ColorsForMatches array              
+                //use the participant plus the game of match then divide by 5.  
+                //use the remainder as the index 
+                col = colors[ColorsForMatches[(GameOfMatch + GameProgress.ParticipantId) % 5][i]];
                 //turn off the same color restriction
                 PlayerPrefs.SetInt("sameColor", 1);
             }
