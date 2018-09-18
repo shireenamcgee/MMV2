@@ -71,7 +71,7 @@ public class settings : MonoBehaviour
 
     public void playClicked()
     {
-        Application.LoadLevel("megaMind");
+        Application.LoadLevel("menu");
     }
 
 

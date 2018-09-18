@@ -11,6 +11,9 @@ using System.Linq;
 
 public class megaMind : MonoBehaviour
 {
+    /// <summary>
+    /// The output file formatter 
+    /// </summary>
     public class EventRecord
     {
 
@@ -23,8 +26,10 @@ public class megaMind : MonoBehaviour
         public int Col { get; set; }
         public string Color { get; set; }
         public int GameNumber { get; set; }
-        /// <summary>
+        
+		/// <summary>
         /// CSV FORMATTED RECORD
+		/// columns EventTime,ParticipantId,EventName,DataKey,DataValue,Row,Col,Color,GameNumber
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -32,29 +37,30 @@ public class megaMind : MonoBehaviour
             string dv = DataValue != null && DataValue.Contains(",") ? "\"" + DataValue + "\"" : DataValue;
             return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8}", EventTime.Value.ToString("yyyyMMddhhmmssff"), ParticipantId, EventName, DataKey, dv , Row, Col, Color, GameNumber);
         }
+		
         public string GetHeader()
         {
             return "EventTime,ParticipantId,EventName,DataKey,DataValue,Row,Col,Color,GameNumber";
         }
     }
 
+    /// <summary>
+    /// This class handles the output file 
+    /// </summary>
     public static class GameProgress 
     {
         public static int CurrentRow;
         public static int CurrentCol;
         public static int ParticipantId;
-        public static string baseDirectory
+		
+		///the output filename format Megamind_20180912.csv	
+		///		
+        public static string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}.csv", System.DateTime.Today.ToString("yyyyMMdd")));
+		
+		public static string baseDirectory
         {
             get { return System.Environment.GetFolderPath( System.Environment.SpecialFolder.Personal);}
-        }
-        public static string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}", System.DateTime.Today.ToString("yyyyMMdd")));
-        public static void Write(string eventName)
-        {
-
-            Write(new EventRecord() { EventName = eventName });
-        }
-
-
+        }       
 
         public static void Write(EventRecord Record)
         {
@@ -64,7 +70,7 @@ public class megaMind : MonoBehaviour
             Record.ParticipantId = ParticipantId.ToString();
             Record.Col = CurrentCol;
             Record.Row = CurrentRow;
-            string OutputFilename = System.IO.Path.Combine(baseDirectory, string.Format("Megamind_{0}", System.DateTime.Today.ToString("yyyyMMdd")));
+         
             System.IO.FileInfo fi = new System.IO.FileInfo(OutputFilename);
             bool AddHeader = !fi.Exists;
             using (var sw = fi.AppendText())
@@ -84,6 +90,8 @@ public class megaMind : MonoBehaviour
 
     }
 
+
+
     // first of all some references to ui objects, 
     // which get modified in the gameplay
 
@@ -95,7 +103,6 @@ public class megaMind : MonoBehaviour
     public Sprite[] swPinImages;
 
     public Button[] pinColors;
-
 
     // dialog windows
     public RectTransform panelGameOver;
@@ -111,7 +118,6 @@ public class megaMind : MonoBehaviour
     public  int currentMove;
     int remainder;
 
-
     // is the game over
     bool gameOver;
 
@@ -122,6 +128,17 @@ public class megaMind : MonoBehaviour
     // user friendly time display in the xx:yy format
     float secondsElapsed;
     float minutesElapsed;
+
+
+    //ADDED for UCONN Project
+    //the system navigates the user throug a fixed number of games then back to the menu screen
+    //sets thenumber of games played before sending the user back to the menu screen
+    private int GamesPerMatch = 5;
+    //the current game of the match
+    private int GameOfMatch = 0;
+
+
+
 
     // Use this for initialization
     void Start()
@@ -155,6 +172,11 @@ public class megaMind : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        //ADDED for UCONN Project
+        //the system navigates the user throug a fixed number of games then back to the menu screen
+        //we replaced game time with game x of y 
+
         // if the game is not over
         //if (!gameOver)
         //{
@@ -174,6 +196,7 @@ public class megaMind : MonoBehaviour
         //}
         // write text to the screen clock
         //gameTime.text = minutesElapsed.ToString("00") + ":" + secondsElapsed.ToString("00");
+
         gameTime.text = string.Format("{0} of {1}", GameOfMatch, GamesPerMatch);
         // the escape key is equivalent to android's back button
         if (Input.GetKey(KeyCode.Escape))
@@ -216,23 +239,28 @@ public class megaMind : MonoBehaviour
         gameOver = false;
     }
 
-    private int GamesPerMatch = 5;
-    private int GameOfMatch = 0;
 
-    /// <summary>
-    /// This method calculates a code the player has to guess
-    /// The game is setup to run in a 5 game sequence
-    /// these are the initial colors for each of those games
+    /// <summary> 
+    ///ADDED for UCONN Project
+    /// contains the secret colors the user must guess
+    /// see setCode for use
     /// </summary>
     static int[][] ColorsForMatches =
     {
+        new int[] {0,0,0,0 },
         new int[] {1,1,1,1 },
         new int[] {2,2,2,2 },
         new int[] {3,3,3,3 },
         new int[] {4,4,4,4 },
         new int[] {5,5,5,5 }
      };
-    
+
+    /// <summary>
+    /// This method calculates a code the player has to guess
+    /// 
+    /// UPDATED for UCONN Project 
+    /// The game is now setup to run in a 5 game sequence if Randomize == false;
+    /// </summary>
     public void setCode(bool Randomize = false)
     {
         // find the gameobject
@@ -258,11 +286,12 @@ public class megaMind : MonoBehaviour
                 col = colors[Random.Range(0, colors.Count)];
             }
             else
-            {
-                //get the value from the ColorsForMatches array              
-                //use the participant plus the game of match then divide by 5.  
-                //use the remainder as the index 
-                col = colors[ColorsForMatches[(GameOfMatch + GameProgress.ParticipantId) % 5][i]];
+            {   // get the value from the ColorsForMatches array
+                // make the sequence of secrets change for successive participants 
+                // the participant Id, since it increments each match, can be used for this
+                // participant Id plus the game of match then divide by the number of distinct secrets we have.  
+                // use the remainder as the index                 
+                col = colors[ColorsForMatches[(GameOfMatch + GameProgress.ParticipantId) % ColorsForMatches.Length][i]];
                 //turn off the same color restriction
                 PlayerPrefs.SetInt("sameColor", 1);
             }
@@ -313,12 +342,10 @@ public class megaMind : MonoBehaviour
 
 
 
-    //
-    // public void activateButtons(int activeRow)
-    //
-    // this method activates the current row
-    // so the player can only click four buttons at a time
-    //
+    /// public void activateButtons(int activeRow)
+    ///
+    /// this method activates the current row
+    /// so the player can only click four buttons at a time
 
     public void activateButtons(int activeRow)
     {
