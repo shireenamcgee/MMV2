@@ -247,7 +247,7 @@ public class megaMind : MonoBehaviour
     /// </summary>
     static int[][] ColorsForMatches =
     {
-        new int[] {0,0,0,0 },
+ 
         new int[] {1,1,1,1 },
         new int[] {2,2,2,2 },
         new int[] {3,3,3,3 },
@@ -273,7 +273,7 @@ public class megaMind : MonoBehaviour
         {
             colors.Add(i);
         }
-
+        string[] secrets = {"","","","" };
         // get the single code colors
         for (int i = 0; i < 4; i++)
         {
@@ -298,16 +298,17 @@ public class megaMind : MonoBehaviour
 
             // set the sprite
             codePin.sprite = pinImages[col];
-
+            secrets[i] = col.ToString();
             // multiple colors are allowed, if sameColor = 1
             // if not, the used color has to be removed
             if (PlayerPrefs.GetInt("sameColor") != 1)
                 colors.Remove(col);
-
-            string SecretColorSet = string.Join(",", colors.Select(c=> c.ToString()).ToArray<string >());
-           
-            GameProgress.Write(new EventRecord() { EventName = "SetSecretColors", GameNumber = GameOfMatch, DataKey ="SecretColors", DataValue = SecretColorSet });            
+            
+                      
         }
+        string SecretColorSet = string.Join(",", secrets);
+
+        GameProgress.Write(new EventRecord() { EventName = "SetSecretColors", GameNumber = GameOfMatch, DataKey = "SecretColors", DataValue = SecretColorSet });
     }
 
 
